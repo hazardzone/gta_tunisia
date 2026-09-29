@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Grand Theft Tunisia — The Feed</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-shell">
+    <canvas id="game" aria-label="Grand Theft Tunisia game canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <aside class="left-hud">
+      <div class="brand"><span>grand</span><span>theft</span><span>auto</span><em>Tunisia</em></div>
+      <nav>
+        <button data-panel="journal" class="active">▤ <span>JOURNAL</span></button>
+        <button data-panel="missions">✥ <span>MISSIONS</span></button>
+        <button data-panel="map">⌖ <span>MAP</span></button>
+        <button data-panel="characters">● <span>CHARACTERS</span></button>
+        <button data-panel="inventory">▣ <span>INVENTORY</span></button>
+        <button data-panel="stats">▥ <span>STATS</span></button>
+        <button data-panel="settings">⚙ <span>SETTINGS</span></button>
+      </nav>
+      <div class="controls"><b>WASD</b> move · <b>E</b> interact · <b>F</b> feed · <b>ESC</b> close</div>
+    </aside>
+
+    <header class="top-hud">
+      <div><small>TUNIS</small><strong id="clock">22:47</strong><span>SEP 29, 2026</span></div>
+      <div class="wanted">◉<br><small id="wantedText">CALM</small></div>
+      <div class="bars"><i></i><i></i><i></i></div>
+      <div class="cash" id="cash">$0002450</div>
+    </header>
+
+    <section id="panel" class="panel"></section>
+
+    <div id="mission-toast" class="mission-toast hidden"></div>
+    <div id="interact" class="interact hidden">E · INTERACT</div>
+
+    <footer class="bottom-hud">
+      <div class="quote">“You don’t need to see everything to know where you’re going.”<br><b>— Tunis</b></div>
+      <div class="district">⌖ <b>TUNIS</b></div>
+      <div class="quick-actions">
+        <button data-panel="map">◎<span>EXPLORE<br>THE REAL</span></button>
+        <button data-panel="journal">✺<span>THINK<br>CRITICALLY</span></button>
+        <button data-panel="stats">♡<span>PROTECT<br>YOUR PEACE</span></button>
+        <button data-panel="missions">♛<span>BUILD<br>YOUR FUTURE</span></button>
+      </div>
+    </footer>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
