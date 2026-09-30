@@ -8,6 +8,7 @@ const joystickKnob=document.getElementById('joystick-knob');
 const rotateOverlay=document.getElementById('rotate-overlay');
 
 let W=0,H=0,keys={},last=0,gameTime=0,openPanel='journal';
+let portraitOverlayDismissed=false;
 const state={money:2450,critical:0,peace:62,mission:0,evidence:0,side:{uni:false,budget:false,health:false,relations:false,addiction:false,friends:false,confidence:false}};
 const player={x:780,y:520,r:15,speed:185};
 const world={w:2300,h:1450};
@@ -42,6 +43,12 @@ function clamp(value,min,max){return Math.min(Math.max(value,min),max)}
 function isTouchDevice(){return navigator.maxTouchPoints>0 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);}
 function isPortraitMode(){return window.innerHeight > window.innerWidth;}
 
+function syncRotateOverlay(){
+  const showPortraitOverlay = isTouchDevice() && window.innerWidth <= 768 && isPortraitMode() && !portraitOverlayDismissed;
+  rotateOverlay.classList.toggle('show', showPortraitOverlay);
+  rotateOverlay.style.display = showPortraitOverlay ? 'grid' : 'none';
+}
+
 function resize(){
   const viewport = window.visualViewport || {width:window.innerWidth,height:window.innerHeight};
   const width = Math.max(320, viewport.width || window.innerWidth);
@@ -55,14 +62,24 @@ function resize(){
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   const mobileMode = isTouchDevice() && window.innerWidth <= 768;
   document.body.classList.toggle('mobile-mode', mobileMode);
-  const showPortraitOverlay = mobileMode && isPortraitMode();
-  rotateOverlay.classList.toggle('show', showPortraitOverlay);
+  syncRotateOverlay();
   if (mobileMode) {
     panel.classList.add('mobile-panel');
   } else {
     panel.classList.remove('mobile-panel');
   }
 }
+
+rotateOverlay.addEventListener('click',()=>{
+  portraitOverlayDismissed = true;
+  syncRotateOverlay();
+});
+canvas.addEventListener('pointerdown',()=>{
+  if (isTouchDevice() && isPortraitMode() && window.innerWidth <= 768 && !portraitOverlayDismissed) {
+    portraitOverlayDismissed = true;
+    syncRotateOverlay();
+  }
+});
 
 addEventListener('resize', resize);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
@@ -109,7 +126,7 @@ function renderPanel(){
   let html='';
   if(openPanel==='journal') html=`<h1>MISSION 01 — <span class="neon">THE FEED</span></h1><p>Social Media is a Different Kind of Drug.</p><div class="card"><h2>WHAT HAPPENED</h2><ul><li>Woke up and checked Instagram. <span class="tag confirmed">CONFIRMED</span></li><li>Saw crime, police, scams and violence. <span class="tag confirmed">CONFIRMED</span></li><li>Nothing happened directly to you. <span class="tag confirmed">CONFIRMED</span></li><li>Spent hours scrolling and felt worse. <span class="tag confirmed">CONFIRMED</span></li></ul></div><div class="card"><h2>WHAT IT MIGHT MEAN</h2><ul><li>Real events may be only a small part of the full picture. <span class="tag uncertain">UNCERTAIN</span></li><li>Your feed may be a biased slice chosen by an algorithm. <span class="tag uncertain">UNCERTAIN</span></li><li>Fear-heavy content can be amplified by constant exposure. <span class="tag uncertain">UNCERTAIN</span></li></ul></div><div class="card"><h2>SOCIAL-MEDIA LORE</h2><ul><li>“Tunis is falling apart.” <span class="tag unverified">UNVERIFIED</span></li><li>“Police are everywhere.” <span class="tag unverified">UNVERIFIED</span></li><li>“Scams are targeting everyone.” <span class="tag unverified">UNVERIFIED</span></li></ul></div><div class="card"><h2>OBJECTIVE</h2><p>Explore Tunis, collect <b>${evidenceProgress}</b> pieces of evidence, and separate what happened from what the feed tells you it means.</p></div>`;
   if(openPanel==='missions') html=`<h1>MISSIONS</h1><div class="card"><h2>01 · THE FEED</h2><p>Collect evidence around Tunis. Interact with 5 marked locations.</p><p class="confirmed">Progress: ${evidenceProgress}</p></div><div class="card"><h2>SIDE QUESTS</h2><p>University Application · Money & Budgeting · Health & Medication · Relationships · Finding Real Friends · Rebuilding Confidence.</p></div>`;
-  if(openPanel==='map') html=`<h1>MAP — TUNIS</h1><p>Walk the city and investigate marked locations.</p><div class="card" style="height:380px;position:relative;background:#071725"><div style="position:absolute;inset:15px;border:1px solid #15506b;background:radial-gradient(circle,#17334a,#07121d)">${locations.map(l=>`<div style="position:absolute;left:${(l.x/world.w)*90}%;top:${(l.y/world.h)*85}%;color:${l.color};font-weight:bold;font-size:12px">◆ ${l.label}</div>`).join('')}</div></div><p>Controls: WASD to move · E to investigate · F for journal.</p>`;
+  if(openPanel==='map') html=`<h1>MAP — TUNIS</h1><p>Walk the city and investigate marked locations.</p><div class="card" style="height:380px;position:relative;background:#071725"><div style="position:absolute;inset:15px;border:1px solid #15506b;background:radial-gradient(circle,#17334a,#07121d)">${locations.map(l=>`<div style="position:absolute;left:${(l.x/world.w)*90}%;top:${(l.y/world.h)*85}%;color:${l.color};font-weight:bold;font-size:12px">◆ ${l.label}</div>`).join('')}<div style="position:absolute;left:${((player.x/world.w)*90)}%;top:${((player.y/world.h)*85)}%;width:12px;height:12px;border-radius:50%;background:#20d9ff;border:2px solid #fff;box-shadow:0 0 12px rgba(32,217,255,.8);transform:translate(-50%,-50%);"></div></div></div><p>Controls: WASD to move · E to investigate · F for journal.</p>`;
   if(openPanel==='characters') html=`<h1>CHARACTERS</h1>${[['CJ (You)','Trying to build a better future in Tunisia.'],['The Online Influencer','Posts the “truth” — or whatever gets views.'],['Café Regulars','Some are friends, some are just talking.'],['The System','Police, bureaucracy, family pressure, society.'],['The Dream','Education, freedom, financial stability.']].map(x=>`<div class="card"><h2>${x[0]}</h2><p>${x[1]}</p></div>`).join('')}`;
   if(openPanel==='inventory') html=`<h1>INVENTORY</h1><div class="card"><h2>PHONE</h2><p>Battery: 82% · Feed exposure: ${Math.max(0,100-state.critical*7)}%</p></div><div class="card"><h2>EVIDENCE</h2><p>${state.evidence} / 5 collected.</p></div><div class="card"><h2>CASH</h2><p class="confirmed">$${String(state.money).padStart(7,'0')}</p></div>`;
   if(openPanel==='stats') html=`<h1>STATS</h1><div class="card"><h2>CRITICAL THINKING</h2><p style="font-size:28px;color:#21ff78">${state.critical}</p><p>Evidence inspected.</p></div><div class="card"><h2>PEACE</h2><p style="font-size:28px;color:#ff20d5">${state.peace}%</p><p>Higher is better. Touch grass occasionally.</p></div><div class="card"><h2>MISSION STATUS</h2><p>${state.evidence===5?'MISSION COMPLETE':'IN PROGRESS'}</p></div>`;
